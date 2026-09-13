@@ -2,6 +2,11 @@
 
 All notable changes to the Drift extension are documented here.
 
+## [0.6.2] - 2026-09-13
+
+### Fixed
+- Marketplace version and installs badges now use vsmarketplacebadges.dev; shields.io retired its Marketplace badges. Added a rating badge.
+
 ## [0.6.1] - 2026-09-12
 
 Marketplace listing improvements, no functional changes.

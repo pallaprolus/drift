@@ -2,8 +2,9 @@
 
 <img src="./images/icon.png" width="128" alt="Drift Logo" />
 
-[![Marketplace](https://img.shields.io/visual-studio-marketplace/v/pallaprolus.drift?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift)
-[![Installs](https://img.shields.io/visual-studio-marketplace/i/pallaprolus.drift)](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift)
+[![Marketplace](https://vsmarketplacebadges.dev/version-short/pallaprolus.drift.svg)](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift)
+[![Installs](https://vsmarketplacebadges.dev/installs-short/pallaprolus.drift.svg)](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift)
+[![Rating](https://vsmarketplacebadges.dev/rating-short/pallaprolus.drift.svg)](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift&ssr=false#review-details)
 [![Open VSX](https://img.shields.io/open-vsx/v/pallaprolus/drift?label=open%20vsx)](https://open-vsx.org/extension/pallaprolus/drift)
 [![Tests](https://img.shields.io/github/actions/workflow/status/pallaprolus/drift-vscode/test.yml?branch=main&label=tests)](https://github.com/pallaprolus/drift-vscode/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)

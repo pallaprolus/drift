@@ -2,7 +2,7 @@
   "name": "drift",
   "displayName": "Drift - Documentation Sync Detector",
   "description": "Detect when documentation drifts out of sync with your code: JSDoc, docstrings, README code blocks, Git history, and optional AI semantic checks",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "publisher": "pallaprolus",
   "pricing": "Free",
   "icon": "images/icon.png",
@@ -12,14 +12,19 @@
   },
   "badges": [
     {
-      "url": "https://img.shields.io/visual-studio-marketplace/v/pallaprolus.drift?label=marketplace",
+      "url": "https://vsmarketplacebadges.dev/version-short/pallaprolus.drift.svg",
       "href": "https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift",
       "description": "VS Code Marketplace version"
     },
     {
-      "url": "https://img.shields.io/visual-studio-marketplace/i/pallaprolus.drift",
+      "url": "https://vsmarketplacebadges.dev/installs-short/pallaprolus.drift.svg",
       "href": "https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift",
       "description": "Marketplace installs"
+    },
+    {
+      "url": "https://vsmarketplacebadges.dev/rating-short/pallaprolus.drift.svg",
+      "href": "https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift&ssr=false#review-details",
+      "description": "Marketplace rating"
     },
     {
       "url": "https://img.shields.io/open-vsx/v/pallaprolus/drift?label=open%20vsx",
