@@ -1,6 +1,5 @@
-import * as vscode from 'vscode';
 import { BaseParser } from './baseParser';
-import { DocCodePair, DocType, CodeSignature, CodeType } from '../models/types';
+import { DocCodePair, DocType, CodeSignature, CodeType, SourceDocument, TextRange } from '../models/types';
 
 export class JavaParser extends BaseParser {
     languageId = 'java';
@@ -9,7 +8,7 @@ export class JavaParser extends BaseParser {
     /**
      * Parse Java file for documentation and code pairs
      */
-    async parseDocCodePairs(document: vscode.TextDocument): Promise<DocCodePair[]> {
+    async parseDocCodePairs(document: SourceDocument): Promise<DocCodePair[]> {
         const pairs: DocCodePair[] = [];
         const text = document.getText();
         const lines = text.split('\n');
@@ -69,12 +68,12 @@ export class JavaParser extends BaseParser {
                     // commentStartLine is known. currentDocLines contains the block.
                     const commentEndLine = commentStartLine + currentDocLines.length - 1;
 
-                    const docRange = new vscode.Range(
+                    const docRange = this.ranges.range(
                         commentStartLine, 0,
                         commentEndLine, lines[commentEndLine].length
                     );
 
-                    const codeRange = new vscode.Range(
+                    const codeRange = this.ranges.range(
                         i, 0,
                         i, line.length
                     );
@@ -113,7 +112,7 @@ export class JavaParser extends BaseParser {
     /**
      * Extract signature from Java method definition
      */
-    extractCodeSignature(content: string, _range: vscode.Range): CodeSignature {
+    extractCodeSignature(content: string, _range: TextRange): CodeSignature {
         const signature: CodeSignature = {
             name: '',
             type: CodeType.Function,

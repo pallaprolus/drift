@@ -22,11 +22,13 @@ export class WorkspaceScanner {
     private gitTracker: GitTracker = new GitTracker();
     private gitInfo: Map<string, GitPairInfo> = new Map();
     private symbolIndexBuilt = false;
+    private isReviewed: (pair: DocCodePair) => boolean;
 
-    constructor(config: DriftConfig) {
+    constructor(config: DriftConfig, isReviewed: (pair: DocCodePair) => boolean = () => false) {
         this.parserRegistry = ParserRegistry.getInstance();
         this.analyzer = new DriftAnalyzer();
         this.config = config;
+        this.isReviewed = isReviewed;
     }
 
     /**
@@ -133,10 +135,11 @@ export class WorkspaceScanner {
         // Parse doc-code pairs
         const pairs = await this.parserRegistry.parseDocument(document);
 
-        // Analyze each pair for drift
-        let analyzedPairs = pairs.map(pair =>
-            this.analyzer.analyzePair(pair, parser as BaseParser)
-        );
+        // Analyze each pair for drift, then apply persisted review state
+        let analyzedPairs = pairs.map(pair => {
+            const analyzed = this.analyzer.analyzePair(pair, parser as BaseParser);
+            return this.isReviewed(analyzed) ? { ...analyzed, isReviewed: true } : analyzed;
+        });
 
         // Git-based change tracking
         if (this.config.gitEnabled && document.uri.scheme === 'file') {
@@ -282,6 +285,13 @@ export class WorkspaceScanner {
      */
     setResultsForFile(filePath: string, pairs: DocCodePair[]): void {
         this.scanResults.set(filePath, pairs);
+    }
+
+    /**
+     * Cached results grouped by file
+     */
+    getResultsByFile(): ReadonlyMap<string, DocCodePair[]> {
+        return this.scanResults;
     }
 
     /**

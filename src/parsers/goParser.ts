@@ -1,6 +1,5 @@
-import * as vscode from 'vscode';
 import { BaseParser } from './baseParser';
-import { DocCodePair, DocType, CodeSignature, CodeType, ParameterInfo } from '../models/types';
+import { DocCodePair, DocType, CodeSignature, CodeType, ParameterInfo, SourceDocument, TextRange } from '../models/types';
 
 export class GoParser extends BaseParser {
     languageId = 'go';
@@ -9,7 +8,7 @@ export class GoParser extends BaseParser {
     /**
      * Parse Go file for documentation and code pairs
      */
-    async parseDocCodePairs(document: vscode.TextDocument): Promise<DocCodePair[]> {
+    async parseDocCodePairs(document: SourceDocument): Promise<DocCodePair[]> {
         const pairs: DocCodePair[] = [];
         const text = document.getText();
         const lines = text.split('\n');
@@ -44,12 +43,12 @@ export class GoParser extends BaseParser {
                 // But we'll allow it if strictly adjacent for now
 
                 const docContent = currentDocLines.join('\n');
-                const docRange = new vscode.Range(
+                const docRange = this.ranges.range(
                     docStartLine, 0,
                     i - 1, lines[i - 1].length
                 );
 
-                const codeRange = new vscode.Range(
+                const codeRange = this.ranges.range(
                     i, 0,
                     i, line.length
                 );
@@ -80,7 +79,7 @@ export class GoParser extends BaseParser {
     /**
      * Extract signature from Go function definition
      */
-    extractCodeSignature(content: string, _range: vscode.Range): CodeSignature {
+    extractCodeSignature(content: string, _range: TextRange): CodeSignature {
         const signature: CodeSignature = {
             name: '',
             type: CodeType.Function,

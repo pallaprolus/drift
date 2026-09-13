@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { WorkspaceScanner } from './analyzers/workspaceScanner';
 import { DriftDashboardProvider } from './providers/dashboardProvider';
 import { DecorationProvider } from './providers/decorationProvider';
+import { DiagnosticsProvider } from './providers/diagnosticsProvider';
 import { DriftCodeLensProvider } from './providers/codeLensProvider';
 import { QuickFixProvider } from './providers/quickFixProvider';
 import { StateManager } from './providers/stateManager';
@@ -13,10 +14,13 @@ import * as path from 'path';
 import * as os from 'os';
 
 import { DriftLogger } from './utils/logger';
+import { vscodeRangeFactory } from './providers/vscodeRanges';
+import { ParserRegistry } from './parsers/parserRegistry';
 
 let scanner: WorkspaceScanner;
 let dashboardProvider: DriftDashboardProvider;
 let decorationProvider: DecorationProvider;
+let diagnosticsProvider: DiagnosticsProvider;
 let codeLensProvider: DriftCodeLensProvider;
 let stateManager: StateManager;
 let semanticAnalyzer: SemanticAnalyzer;
@@ -33,8 +37,21 @@ export interface DriftApi {
  * Extension activation
  */
 export async function activate(context: vscode.ExtensionContext): Promise<DriftApi> {
-    DriftLogger.initialize('Drift');
+    const outputChannel = vscode.window.createOutputChannel('Drift');
+    context.subscriptions.push(outputChannel);
+    DriftLogger.setSink({
+        log: message => outputChannel.appendLine(message),
+        error: (message, error) => {
+            outputChannel.appendLine(message);
+            if (error) {
+                outputChannel.appendLine(error instanceof Error ? error.stack || error.message : String(error));
+            }
+        }
+    });
     DriftLogger.log('Drift extension activated');
+
+    // Parsers produce real vscode.Range objects inside the editor
+    ParserRegistry.getInstance().setRangeFactory(vscodeRangeFactory);
 
     // Load configuration
     const config = loadConfig();
@@ -44,9 +61,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<DriftA
     await stateManager.initialize();
 
     // Initialize components
-    scanner = new WorkspaceScanner(config);
+    scanner = new WorkspaceScanner(config, pair => stateManager.isReviewed(pair));
     dashboardProvider = new DriftDashboardProvider();
     decorationProvider = new DecorationProvider();
+    diagnosticsProvider = new DiagnosticsProvider();
+    diagnosticsProvider.configure({ enabled: config.showInProblems, threshold: config.driftThreshold });
     codeLensProvider = new DriftCodeLensProvider(stateManager, () => loadConfig().aiProvider !== 'off');
     semanticAnalyzer = new SemanticAnalyzer(context.secrets, () => {
         const c = loadConfig();
@@ -106,17 +125,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<DriftA
     context.subscriptions.push(
         treeView,
         codeLensDisposable,
-        { dispose: () => decorationProvider.dispose() }
+        { dispose: () => decorationProvider.dispose() },
+        { dispose: () => diagnosticsProvider.dispose() }
     );
 
     // Initial scan of open documents
     await scanOpenDocuments();
-
-    // Check for welcome message - Disabled until feedback form is ready
-    // checkWelcomeMessage(context);
-
-    // Send activation ping (telemetry)
-    sendActivationPing(context);
 
     DriftLogger.log('Drift extension ready');
 
@@ -166,6 +180,7 @@ function loadConfig(): DriftConfig {
             'python'
         ]),
         driftThreshold: config.get('driftThreshold', 0.3),
+        showInProblems: config.get('showInProblems', true),
         scanMarkdown: config.get('scanMarkdown', true),
         markdownPatterns: config.get('markdownPatterns', ['**/README.md', '**/docs/**/*.md']),
         gitEnabled: config.get('git.enabled', true),
@@ -193,6 +208,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
                     dashboardProvider.updatePairs(pairs);
                     updateDecorationsForVisibleEditors();
                     updateCodeLensForVisibleEditors();
+                    syncAllDiagnostics();
 
                     // Update state manager with scan time
                     stateManager.setLastFullScan(new Date());
@@ -278,6 +294,9 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
                 updateDecorationsForVisibleEditors();
                 codeLensProvider.refresh();
+                if (pair) {
+                    diagnosticsProvider.update(pair.filePath, scanner.getResultsForFile(pair.filePath) ?? []);
+                }
                 vscode.window.showInformationMessage('Documentation marked as reviewed');
             }
         })
@@ -302,6 +321,7 @@ function registerCommands(context: vscode.ExtensionContext): void {
             dashboardProvider.markAsReviewed(pair.id);
             updateDecorationsForVisibleEditors();
             codeLensProvider.refresh();
+            diagnosticsProvider.update(pair.filePath, scanner.getResultsForFile(pair.filePath) ?? []);
 
             vscode.window.showInformationMessage(`Documentation for "${pair.codeSignature.name}" marked as synced`);
         })
@@ -340,14 +360,6 @@ function registerCommands(context: vscode.ExtensionContext): void {
             await vscode.commands.executeCommand('drift.scanWorkspace');
         })
     );
-
-    // Share feedback command - Disabled until feedback form is ready
-    // context.subscriptions.push(
-    //     vscode.commands.registerCommand('drift.shareFeedback', async () => {
-    //         const feedbackUrl = 'https://forms.google.com/your-form-link'; // Placeholder
-    //         await vscode.env.openExternal(vscode.Uri.parse(feedbackUrl));
-    //     })
-    // );
 
     // Export report command
     context.subscriptions.push(
@@ -588,8 +600,10 @@ function registerEventListeners(context: vscode.ExtensionContext, _config: Drift
             if (event.affectsConfiguration('drift')) {
                 const newConfig = loadConfig();
                 scanner.updateConfig(newConfig);
+                diagnosticsProvider.configure({ enabled: newConfig.showInProblems, threshold: newConfig.driftThreshold });
                 updateDecorationsForVisibleEditors();
                 codeLensProvider.refresh();
+                syncAllDiagnostics();
             }
         })
     );
@@ -667,6 +681,7 @@ async function runSemanticAnalysis(pairs: DocCodePair[], title: string): Promise
     dashboardProvider.updatePairs(scanner.getAllResults());
     updateDecorationsForVisibleEditors();
     updateCodeLensForVisibleEditors();
+    syncAllDiagnostics();
 
     if (lastError && checked === 0) {
         const action = await vscode.window.showErrorMessage(`Drift AI check failed: ${lastError}`, 'Set API Key');
@@ -746,12 +761,24 @@ async function scanOpenDocuments(): Promise<void> {
  * Update decorations for a specific editor
  */
 function updateDecorationsForEditor(editor: vscode.TextEditor, pairs: DocCodePair[]): void {
+    if (editor.document.uri.scheme === 'file') {
+        diagnosticsProvider.update(editor.document.uri.fsPath, pairs);
+    }
     const config = loadConfig();
     decorationProvider.applyDecorations(editor, pairs, {
         enableGutter: config.enableGutterIcons,
         enableInline: config.enableInlineDecorations,
         threshold: config.driftThreshold
     });
+}
+
+/**
+ * Republish diagnostics for every scanned file
+ */
+function syncAllDiagnostics(): void {
+    for (const [filePath, pairs] of scanner.getResultsByFile()) {
+        diagnosticsProvider.update(filePath, pairs);
+    }
 }
 
 /**
@@ -786,50 +813,4 @@ export async function deactivate(): Promise<void> {
     decorationProvider?.clearAllDecorations();
     DriftLogger.log('Drift extension deactivated');
     DriftLogger.dispose();
-}
-
-/**
- * Check if welcome message should be shown
- */
-export async function checkWelcomeMessage(context: vscode.ExtensionContext): Promise<void> {
-    const hasShownWelcome = context.globalState.get<boolean>('drift.hasShownWelcome', false);
-
-    if (!hasShownWelcome) {
-        const selection = await vscode.window.showInformationMessage(
-            'If Drift saves you time, please help me by sharing your story here.',
-            'Share Feedback',
-            'Dismiss'
-        );
-
-        if (selection === 'Share Feedback') {
-            vscode.commands.executeCommand('drift.shareFeedback');
-        }
-
-        await context.globalState.update('drift.hasShownWelcome', true);
-    }
-}
-
-/**
- * Send activation ping (telemetry)
- */
-async function sendActivationPing(_context: vscode.ExtensionContext): Promise<void> {
-    // Check if telemetry is enabled
-    if (!vscode.env.isTelemetryEnabled) {
-        return;
-    }
-
-    // Simple activation ping - replace with actual endpoint
-    // const telemetryUrl = 'https://your-telemetry-endpoint.com/activate';
-    // try {
-    //     await fetch(telemetryUrl, { method: 'POST' });
-    // } catch (e) {
-    //     // Ignore telemetry errors
-    // }
-
-    //     await fetch(telemetryUrl, { method: 'POST' });
-    // } catch (e) {
-    //     // Ignore telemetry errors
-    // }
-
-    DriftLogger.log('Telemetry: Activation ping sent (simulated)');
 }

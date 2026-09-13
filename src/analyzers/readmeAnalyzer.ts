@@ -1,6 +1,7 @@
 import { DriftReason, DriftSeverity, DriftType, MarkdownCodeBlock, SymbolEntry } from '../models/types';
 import { findClosestMatch } from '../utils/helpers';
 import { SymbolIndex } from './symbolIndex';
+import { isMarkdownBlockIgnored } from './ignore';
 
 /**
  * A reference to a code symbol found inside a Markdown code block
@@ -374,7 +375,9 @@ function shortPath(filePath: string): string {
  * Analyze every analyzable code block in a Markdown document.
  */
 export function analyzeMarkdown(markdown: string, index: SymbolIndex): CodeBlockAnalysis[] {
+    const lines = markdown.split(/\r?\n/);
     return extractCodeBlocks(markdown)
         .filter(isAnalyzableBlock)
+        .filter(block => !isMarkdownBlockIgnored(lines, block.startLine))
         .map(block => analyzeCodeBlock(block, index));
 }

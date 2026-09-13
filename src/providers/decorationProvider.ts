@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DocCodePair, DriftSeverity } from '../models/types';
+import { toVsPosition } from './vscodeRanges';
 
 /**
  * Provides decorations for documentation drift indicators
@@ -75,7 +76,7 @@ export class DecorationProvider {
             // Add gutter decoration
             if (config.enableGutter) {
                 gutterRanges.push({
-                    range: new vscode.Range(pair.docRange.start, pair.docRange.start),
+                    range: new vscode.Range(toVsPosition(pair.docRange.start), toVsPosition(pair.docRange.start)),
                     hoverMessage
                 });
             }

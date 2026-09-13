@@ -1,0 +1,54 @@
+name: 'Drift - Documentation Drift Check'
+description: 'Fail the build when JSDoc, docstrings, or README code blocks no longer match the code'
+author: 'pallaprolus'
+branding:
+  icon: 'book-open'
+  color: 'orange'
+
+inputs:
+  path:
+    description: 'Directory or file to scan (relative to the workspace)'
+    required: false
+    default: '.'
+  fail-on:
+    description: 'Fail when an issue at or above this severity exists: low, medium, high, critical, none'
+    required: false
+    default: 'low'
+  threshold:
+    description: 'Minimum drift score (0-1) to report'
+    required: false
+    default: '0.3'
+  args:
+    description: 'Extra arguments passed to drift-check (for example --no-git --exclude "**/fixtures/**")'
+    required: false
+    default: ''
+  summary:
+    description: 'Write a Markdown report to the job summary'
+    required: false
+    default: 'true'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Build drift-check
+      shell: bash
+      run: |
+        cd "$GITHUB_ACTION_PATH"
+        npm ci --no-audit --no-fund --loglevel=error
+    - name: Run drift-check
+      shell: bash
+      env:
+        DRIFT_PATH: ${{ inputs.path }}
+        DRIFT_FAIL_ON: ${{ inputs.fail-on }}
+        DRIFT_THRESHOLD: ${{ inputs.threshold }}
+        DRIFT_ARGS: ${{ inputs.args }}
+        DRIFT_SUMMARY: ${{ inputs.summary }}
+      run: |
+        CLI="$GITHUB_ACTION_PATH/dist/cli.js"
+        set +e
+        node "$CLI" "$DRIFT_PATH" --fail-on "$DRIFT_FAIL_ON" --threshold "$DRIFT_THRESHOLD" $DRIFT_ARGS
+        STATUS=$?
+        if [ "$DRIFT_SUMMARY" = "true" ] && [ -n "$GITHUB_STEP_SUMMARY" ]; then
+          node "$CLI" "$DRIFT_PATH" --fail-on none --threshold "$DRIFT_THRESHOLD" --format markdown --quiet $DRIFT_ARGS >> "$GITHUB_STEP_SUMMARY" || true
+        fi
+        exit $STATUS

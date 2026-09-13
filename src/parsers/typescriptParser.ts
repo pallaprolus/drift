@@ -1,12 +1,5 @@
-import * as vscode from 'vscode';
 import { BaseParser } from './baseParser';
-import {
-    DocCodePair,
-    DocType,
-    CodeSignature,
-    CodeType,
-    ParameterInfo
-} from '../models/types';
+import { DocCodePair, DocType, CodeSignature, CodeType, ParameterInfo, SourceDocument, TextRange } from '../models/types';
 import { hashContent } from '../utils/helpers';
 
 /**
@@ -16,7 +9,7 @@ export class TypeScriptParser extends BaseParser {
     languageId = 'typescript';
     fileExtensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'];
     
-    async parseDocCodePairs(document: vscode.TextDocument): Promise<DocCodePair[]> {
+    async parseDocCodePairs(document: SourceDocument): Promise<DocCodePair[]> {
         const pairs: DocCodePair[] = [];
         const text = document.getText();
         const lines = text.split('\n');
@@ -39,10 +32,7 @@ export class TypeScriptParser extends BaseParser {
                     // Extract the documentation
                     const docLines = lines.slice(docStart, docEnd + 1);
                     const docContent = docLines.join('\n');
-                    const docRange = new vscode.Range(
-                        new vscode.Position(docStart, 0),
-                        new vscode.Position(docEnd, lines[docEnd].length)
-                    );
+                    const docRange = this.ranges.range(docStart, 0, docEnd, lines[docEnd].length);
                     
                     // Find the code that follows
                     let codeStart = docEnd + 1;
@@ -63,10 +53,7 @@ export class TypeScriptParser extends BaseParser {
                         
                         if (codeInfo) {
                             const codeContent = lines.slice(codeStart, codeInfo.end + 1).join('\n');
-                            const codeRange = new vscode.Range(
-                                new vscode.Position(codeStart, 0),
-                                new vscode.Position(codeInfo.end, lines[codeInfo.end]?.length || 0)
-                            );
+                            const codeRange = this.ranges.range(codeStart, 0, codeInfo.end, lines[codeInfo.end]?.length || 0);
                             
                             const codeSignature = this.extractCodeSignature(codeContent, codeRange);
                             
@@ -155,7 +142,7 @@ export class TypeScriptParser extends BaseParser {
         return null;
     }
     
-    extractCodeSignature(content: string, _range: vscode.Range): CodeSignature {
+    extractCodeSignature(content: string, _range: TextRange): CodeSignature {
         const firstLine = content.split('\n')[0].trim();
         
         // Extract function/method name and parameters

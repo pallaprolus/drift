@@ -148,4 +148,36 @@ suite('Unit Tests: DriftAnalyzer', () => {
         const renamed = result.driftReasons.find(r => r.type === DriftType.ParameterRenamed);
         assert.ok(renamed, 'Should detect parameter rename');
     });
+
+    test('description-only comments produce one low-severity coverage note, not critical drift', () => {
+        const pair: DocCodePair = {
+            id: '4',
+            filePath: 'test.ts',
+            docRange: {} as any,
+            docContent: JSON.stringify({ description: 'Adds two numbers', params: [], tags: [] }),
+            docType: DocType.JSDoc,
+            codeRange: {} as any,
+            codeContent: 'function add(left: number, right: number) {}',
+            codeSignature: {
+                name: 'add',
+                type: CodeType.Function,
+                parameters: [
+                    { name: 'left', type: 'number', isOptional: false, isRest: false },
+                    { name: 'right', type: 'number', isOptional: false, isRest: false }
+                ],
+                modifiers: [],
+                hash: 'hash'
+            },
+            driftScore: 0,
+            driftReasons: [],
+            lastAnalyzed: new Date(),
+            isReviewed: false
+        };
+
+        const result = analyzer.analyzePair(pair, parser);
+        assert.strictEqual(result.driftReasons.length, 1);
+        assert.strictEqual(result.driftReasons[0].type, DriftType.ParameterAdded);
+        assert.match(result.driftReasons[0].message, /Parameters are not documented: left, right/);
+        assert.ok(result.driftScore < 0.3, `score ${result.driftScore} should stay below the default threshold`);
+    });
 });

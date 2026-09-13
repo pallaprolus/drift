@@ -1,4 +1,6 @@
-import * as vscode from 'vscode';
+import { SourceDocument, TextRange } from './text';
+
+export * from './text';
 
 /**
  * Represents a documentation block paired with its code anchor
@@ -8,12 +10,12 @@ export interface DocCodePair {
     filePath: string;
     
     // Documentation info
-    docRange: vscode.Range;
+    docRange: TextRange;
     docContent: string;
     docType: DocType;
     
     // Code anchor info
-    codeRange: vscode.Range;
+    codeRange: TextRange;
     codeContent: string;
     codeSignature: CodeSignature;
     
@@ -163,6 +165,8 @@ export interface DriftConfig {
     excludePatterns: string[];
     supportedLanguages: string[];
     driftThreshold: number;
+    // Problems panel
+    showInProblems: boolean;
     // README / Markdown code block synchronization
     scanMarkdown: boolean;
     markdownPatterns: string[];
@@ -181,21 +185,11 @@ export interface LanguageParser {
     languageId: string;
     fileExtensions: string[];
     
-    parseDocCodePairs(document: vscode.TextDocument): Promise<DocCodePair[]>;
+    parseDocCodePairs(document: SourceDocument): Promise<DocCodePair[]>;
     parseDocumentation(content: string, docType: DocType): ParsedDoc;
-    extractCodeSignature(content: string, range: vscode.Range): CodeSignature;
+    extractCodeSignature(content: string, range: TextRange): CodeSignature;
 }
 
-/**
- * Dashboard tree item for the sidebar view
- */
-export interface DriftTreeItem {
-    pair: DocCodePair;
-    label: string;
-    description: string;
-    tooltip: string;
-    iconPath?: vscode.ThemeIcon;
-}
 
 /**
  * Lightweight description of a code symbol, used to cross-reference

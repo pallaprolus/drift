@@ -2,6 +2,21 @@
 
 All notable changes to the Drift extension are documented here.
 
+## [0.7.0] - 2026-09-13
+
+### Added
+- **Problems panel**: findings are published as diagnostics (source `drift`), so they show up in the Problems view, in the editor's error navigation, and to other tools. Disable with `drift.showInProblems`.
+- **Ignore markers**: put `drift-ignore` on the line above a doc block (or inside it) to skip that pair, `drift-ignore-file` near the top of a file to skip the file, and `<!-- drift-ignore -->` above a fenced block in Markdown.
+- **Command-line runner and GitHub Action**: `drift-check` runs the same parsers and analyzers outside the editor, prints text, Markdown, HTML, or JSON, honors `.gitignore` and reviewed items in `.drift/state.json`, and exits non-zero on drift. The `pallaprolus/drift-vscode` action wraps it for CI with a job summary.
+
+### Fixed
+- Items marked as reviewed are now remembered across sessions: a reviewed pair stays hidden until its code changes.
+- Removed a leftover simulated telemetry ping and the disabled feedback prompt; the extension makes no network calls except the AI checks you trigger.
+
+### Changed
+- Description-only comments with no `@param` tags now produce a single low-severity "parameters are not documented" note instead of one medium issue per parameter, which used to stack up to "critical" for ordinary summary comments.
+- Internal: parsers and analyzers no longer depend on the VS Code API, which is what makes the CLI possible.
+
 ## [0.6.2] - 2026-09-13
 
 ### Fixed

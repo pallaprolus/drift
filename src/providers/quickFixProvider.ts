@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { WorkspaceScanner } from '../analyzers/workspaceScanner';
-import { DocCodePair } from '../models/types';
+import { DocCodePair, rangeContainsLine } from '../models/types';
+import { spanOf, toVsPosition } from './vscodeRanges';
 
 /**
  * Provides Code Actions (Quick Fixes) for detected drift issues
@@ -26,8 +27,9 @@ export class QuickFixProvider implements vscode.CodeActionProvider {
 
         // Find the pair that contains the cursor/selection
         const pair = pairs.find(p =>
-            (p.docRange.contains(range.start) || p.codeRange.contains(range.start)) ||
-            (range.intersection(new vscode.Range(p.docRange.start, p.codeRange.end)))
+            rangeContainsLine(p.docRange, range.start.line) ||
+            rangeContainsLine(p.codeRange, range.start.line) ||
+            range.intersection(spanOf(p.docRange.start, p.codeRange.end)) !== undefined
         );
 
         if (!pair || pair.driftReasons.length === 0) {
@@ -94,27 +96,27 @@ export class QuickFixProvider implements vscode.CodeActionProvider {
                 insertText = closingMatch[1] + `:param ${paramName}: \n`; // Match indentation roughly
             } else {
                 // Single line or weird format
-                insertPosition = pair.docRange.end;
+                insertPosition = toVsPosition(pair.docRange.end);
                 insertText = `\n    :param ${paramName}: `;
             }
         } else {
             // JSDoc / JavaDoc / GoDoc / RustDoc
             if (document.languageId === 'go') {
                 insertText = `// ${paramName}: \n`;
-                insertPosition = pair.docRange.end.translate(0, 1); // Go docs are usually strictly lines. append new line
+                insertPosition = toVsPosition(pair.docRange.end).translate(0, 1); // Go docs are usually strictly lines. append new line
                 // Go is special, docRange might encompass multiple // lines.
                 // We typically append to the last line.
                 // Actually Go doesn't have a standard param tag... mostly conventionally "param x description"
                 return null; // Go Quick Fix not supported yet
             } else if (document.languageId === 'rust') {
                 insertText = `/// * \`${paramName}\` - \n`;
-                insertPosition = pair.docRange.end.translate(0, 1); // Append new line?
+                insertPosition = toVsPosition(pair.docRange.end).translate(0, 1); // Append new line?
                 // Rust is /// ... 
                 // We need to insert a new line with ///
                 const indent = document.lineAt(pair.docRange.start.line).firstNonWhitespaceCharacterIndex;
                 const indentStr = ' '.repeat(indent);
                 insertText = `\n${indentStr}/// * \`${paramName}\` - `;
-                insertPosition = pair.docRange.end;
+                insertPosition = toVsPosition(pair.docRange.end);
             } else {
                 // JS/TS/Java (JSDoc styles)
                 // Insert before '*/'

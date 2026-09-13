@@ -1,6 +1,5 @@
-import * as vscode from 'vscode';
 import { BaseParser } from './baseParser';
-import { DocCodePair, DocType, CodeSignature, CodeType } from '../models/types';
+import { DocCodePair, DocType, CodeSignature, CodeType, SourceDocument, TextRange } from '../models/types';
 
 export class RustParser extends BaseParser {
     languageId = 'rust';
@@ -9,7 +8,7 @@ export class RustParser extends BaseParser {
     /**
      * Parse Rust file for documentation and code pairs
      */
-    async parseDocCodePairs(document: vscode.TextDocument): Promise<DocCodePair[]> {
+    async parseDocCodePairs(document: SourceDocument): Promise<DocCodePair[]> {
         const pairs: DocCodePair[] = [];
         const text = document.getText();
         const lines = text.split('\n');
@@ -70,12 +69,12 @@ export class RustParser extends BaseParser {
 
                 const docEndLine = docStartLine + currentDocLines.length - 1;
 
-                const docRange = new vscode.Range(
+                const docRange = this.ranges.range(
                     docStartLine, 0,
                     docEndLine, lines[docEndLine].length
                 );
 
-                const codeRange = new vscode.Range(
+                const codeRange = this.ranges.range(
                     i, 0,
                     i, line.length
                 );
@@ -106,7 +105,7 @@ export class RustParser extends BaseParser {
     /**
      * Extract signature from Rust function definition
      */
-    extractCodeSignature(content: string, _range: vscode.Range): CodeSignature {
+    extractCodeSignature(content: string, _range: TextRange): CodeSignature {
         const signature: CodeSignature = {
             name: '',
             type: CodeType.Function,

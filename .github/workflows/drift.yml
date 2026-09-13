@@ -1,0 +1,23 @@
+name: Docs drift
+
+# Dogfooding: check this repository's own documentation with the action from this commit.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: ./
+        with:
+          fail-on: none
+          args: --exclude "**/src/test/**" --exclude "**/examples/**"

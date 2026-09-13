@@ -1,12 +1,5 @@
-import * as vscode from 'vscode';
 import { BaseParser } from './baseParser';
-import {
-    DocCodePair,
-    DocType,
-    CodeSignature,
-    CodeType,
-    ParameterInfo
-} from '../models/types';
+import { DocCodePair, DocType, CodeSignature, CodeType, ParameterInfo, SourceDocument, TextRange } from '../models/types';
 import { hashContent } from '../utils/helpers';
 
 /**
@@ -16,7 +9,7 @@ export class PythonParser extends BaseParser {
     languageId = 'python';
     fileExtensions = ['.py', '.pyw', '.pyi'];
 
-    async parseDocCodePairs(document: vscode.TextDocument): Promise<DocCodePair[]> {
+    async parseDocCodePairs(document: SourceDocument): Promise<DocCodePair[]> {
         const pairs: DocCodePair[] = [];
         const text = document.getText();
         const lines = text.split('\n');
@@ -94,18 +87,12 @@ export class PythonParser extends BaseParser {
                     // Extract docstring content
                     const docLines = lines.slice(docStart, docEnd + 1);
                     const docContent = docLines.join('\n');
-                    const docRange = new vscode.Range(
-                        new vscode.Position(docStart, 0),
-                        new vscode.Position(docEnd, lines[docEnd]?.length || 0)
-                    );
+                    const docRange = this.ranges.range(docStart, 0, docEnd, lines[docEnd]?.length || 0);
 
                     // Find the end of the function/class body
                     const codeEnd = this.findBlockEnd(lines, codeStart, signatureEnd);
                     const codeContent = lines.slice(codeStart, codeEnd + 1).join('\n');
-                    const codeRange = new vscode.Range(
-                        new vscode.Position(codeStart, 0),
-                        new vscode.Position(codeEnd, lines[codeEnd]?.length || 0)
-                    );
+                    const codeRange = this.ranges.range(codeStart, 0, codeEnd, lines[codeEnd]?.length || 0);
 
                     const codeSignature = this.extractCodeSignature(codeContent, codeRange);
 
@@ -188,7 +175,7 @@ export class PythonParser extends BaseParser {
         return indent;
     }
 
-    extractCodeSignature(content: string, _range: vscode.Range): CodeSignature {
+    extractCodeSignature(content: string, _range: TextRange): CodeSignature {
         const lines = content.split('\n');
         const firstLine = lines[0].trim();
 

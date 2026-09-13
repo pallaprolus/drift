@@ -1,11 +1,14 @@
-import * as vscode from 'vscode';
 import {
     DocCodePair,
     DocType,
     ParsedDoc,
     CodeSignature,
     CodeType,
-    LanguageParser
+    LanguageParser,
+    RangeFactory,
+    SourceDocument,
+    TextRange,
+    plainRangeFactory
 } from '../models/types';
 import { hashContent, generatePairId } from '../utils/helpers';
 
@@ -16,7 +19,14 @@ export abstract class BaseParser implements LanguageParser {
     abstract languageId: string;
     abstract fileExtensions: string[];
 
-    abstract parseDocCodePairs(document: vscode.TextDocument): Promise<DocCodePair[]>;
+    /** Range builder; the extension swaps in one that creates editor-native ranges */
+    protected ranges: RangeFactory = plainRangeFactory;
+
+    setRangeFactory(factory: RangeFactory): void {
+        this.ranges = factory;
+    }
+
+    abstract parseDocCodePairs(document: SourceDocument): Promise<DocCodePair[]>;
 
     /**
      * Parse documentation content based on doc type
@@ -40,7 +50,7 @@ export abstract class BaseParser implements LanguageParser {
     /**
      * Extract code signature - to be implemented by subclasses
      */
-    abstract extractCodeSignature(content: string, range: vscode.Range): CodeSignature;
+    abstract extractCodeSignature(content: string, range: TextRange): CodeSignature;
 
     /**
      * Parse JSDoc/JavaDoc style documentation
@@ -471,10 +481,10 @@ export abstract class BaseParser implements LanguageParser {
      */
     protected createPair(
         filePath: string,
-        docRange: vscode.Range,
+        docRange: TextRange,
         docContent: string,
         docType: DocType,
-        codeRange: vscode.Range,
+        codeRange: TextRange,
         codeContent: string,
         codeSignature: CodeSignature
     ): DocCodePair {

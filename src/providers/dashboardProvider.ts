@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { DocCodePair, DriftSeverity } from '../models/types';
 import * as path from 'path';
+import { toVsRange } from './vscodeRanges';
 
 /**
  * Tree item representing a drift issue in the dashboard
@@ -45,7 +46,7 @@ export class DriftTreeItem extends vscode.TreeItem {
             arguments: [
                 vscode.Uri.file(pair.filePath),
                 {
-                    selection: new vscode.Range(pair.docRange.start, pair.docRange.end)
+                    selection: toVsRange(pair.docRange)
                 }
             ]
         };

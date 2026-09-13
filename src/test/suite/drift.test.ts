@@ -118,4 +118,17 @@ suite('Integration Test: Drift Detection', () => {
         );
     });
 
+    test('Findings appear in the Problems panel as diagnostics', async function () {
+        this.timeout(60000);
+        const api = await getApi();
+        if (api.getAllResults().length === 0) {
+            await vscode.commands.executeCommand('drift.scanWorkspace');
+        }
+        const libUri = vscode.Uri.file(path.join(vscode.workspace.workspaceFolders![0].uri.fsPath, 'src', 'lib.ts'));
+        const diagnostics = vscode.languages.getDiagnostics(libUri).filter(d => d.source === 'drift');
+        assert.ok(diagnostics.length >= 1, 'lib.ts should have a drift diagnostic');
+        assert.match(diagnostics[0].message, /Documentation drift \(\d+%\)/);
+        assert.ok(diagnostics.some(d => d.message.includes('taxRate')));
+    });
+
 });

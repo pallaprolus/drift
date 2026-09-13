@@ -97,6 +97,24 @@ export class DriftAnalyzer {
             }
         }
 
+        // A description-only comment (no parameter tags at all) is a coverage
+        // gap rather than drift: report it once, at low severity, so it stays
+        // below the default threshold instead of stacking up to "critical".
+        if (doc.params.length === 0) {
+            const undocumented = signature.parameters
+                .filter(p => !['self', 'cls'].includes(p.name.toLowerCase()) && p.name.length > 1)
+                .map(p => p.name);
+            if (undocumented.length > 0) {
+                reasons.push({
+                    type: DriftType.ParameterAdded,
+                    severity: DriftSeverity.Low,
+                    message: `Parameters are not documented: ${undocumented.join(', ')}`,
+                    details: 'The comment has no parameter tags. Add @param entries if you want Drift to track them'
+                });
+            }
+            return reasons;
+        }
+
         // Find code params that aren't documented
         for (const codeParam of signature.parameters) {
             const paramName = codeParam.name.toLowerCase();

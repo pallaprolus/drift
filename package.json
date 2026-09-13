@@ -2,7 +2,7 @@
   "name": "drift",
   "displayName": "Drift - Documentation Sync Detector",
   "description": "Detect when documentation drifts out of sync with your code: JSDoc, docstrings, README code blocks, Git history, and optional AI semantic checks",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "publisher": "pallaprolus",
   "pricing": "Free",
   "icon": "images/icon.png",
@@ -227,6 +227,11 @@
           "maximum": 1,
           "description": "Confidence threshold (0-1) for flagging documentation as potentially stale"
         },
+        "drift.showInProblems": {
+          "type": "boolean",
+          "default": true,
+          "description": "Publish drift findings to the Problems panel as diagnostics (source: drift)"
+        },
         "drift.scanMarkdown": {
           "type": "boolean",
           "default": true,
@@ -288,7 +293,9 @@
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
     "test": "node ./out/test/runTest.js",
-    "test:unit": "tsc -p . --outDir out && node runUnitTests.js"
+    "test:unit": "tsc -p . --outDir out && node runUnitTests.js",
+    "build:cli": "node esbuild.js --cli",
+    "prepare": "node esbuild.js --cli"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.124.0",
@@ -307,5 +314,8 @@
     "minimatch": "^9.0.3",
     "mocha": "^11.7.5",
     "typescript": "^5.3.0"
+  },
+  "bin": {
+    "drift-check": "dist/cli.js"
   }
 }

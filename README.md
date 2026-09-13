@@ -76,6 +76,56 @@ Signature checks can't tell you that a docstring says "throws when missing" whil
 
 **Drift: Export Report** writes the current findings as **Markdown** (for pull requests and wikis), a self-contained **HTML** page, or **JSON** for CI pipelines.
 
+### 🚦 Problems Panel
+
+Findings are also published as diagnostics with source `drift`, so they appear in the Problems view and in the editor's error navigation alongside your linters. Turn this off with `drift.showInProblems`.
+
+### 🙈 Ignore Markers
+
+Some mismatches are intentional. Opt out without changing the docs:
+
+```typescript
+// drift-ignore
+/**
+ * Kept for backwards compatibility; the second argument is intentionally undocumented.
+ */
+function legacy(a: string, b?: string) {}
+```
+
+- `drift-ignore` on the line above a doc block, or anywhere inside it, skips that pair
+- `drift-ignore-file` in the first lines of a file skips the whole file
+- `<!-- drift-ignore -->` above a fenced code block in Markdown skips that block
+
+### 🤖 CI: Command Line and GitHub Action
+
+The same checks run outside the editor. Run it on any repository without installing anything:
+
+```bash
+npx github:pallaprolus/drift-vscode --fail-on high
+```
+
+```text
+src/lib.ts
+  !! 7: calculateTotal (critical, 100%)
+       - Documented parameter 'taxRate' not found in code
+       - Parameter 'discount' is not documented
+
+1 issue(s) in 1 file(s): 1 critical, 0 high, 0 medium, 0 low
+```
+
+Options: `--format text|markdown|html|json`, `--output <file>`, `--threshold <0-1>`, `--fail-on low|medium|high|critical|none`, `--exclude <glob>`, `--no-git`, `--no-markdown`, `--no-gitignore`. It honors `.gitignore` and the reviewed items in `.drift/state.json`, and exits with 1 when drift at or above `--fail-on` is found.
+
+Or add it to a workflow. The action writes a Markdown report to the job summary:
+
+```yaml
+- uses: actions/checkout@v4
+  with:
+    fetch-depth: 0   # full history lets the Git checks work
+- uses: pallaprolus/drift-vscode@v0.7.0
+  with:
+    fail-on: high
+```
+
 ## Supported Languages
 
 - TypeScript / JavaScript (JSDoc)
@@ -164,6 +214,9 @@ Configure Drift in your VS Code settings:
   
   // Minimum drift score (0-1) to show warnings
   "drift.driftThreshold": 0.3,
+
+  // Publish findings to the Problems panel
+  "drift.showInProblems": true,
 
   // Check README / docs code blocks against the code
   "drift.scanMarkdown": true,

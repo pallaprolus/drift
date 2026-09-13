@@ -1,0 +1,6 @@
+# npm package (used by `npx github:pallaprolus/drift-vscode`): ship only the CLI bundle.
+# README, LICENSE, CHANGELOG and package.json are always included by npm.
+*
+!dist/
+!dist/cli.js
+!CHANGELOG.md

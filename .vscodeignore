@@ -5,6 +5,7 @@ src/**
 examples/**
 node_modules/**
 out/**
+dist/**
 !out/extension.js
 .gitignore
 .eslintrc.js
@@ -17,3 +18,5 @@ package-lock.json
 *.vsix
 .drift/**
 images/icon.svg
+action.yml
+.npmignore

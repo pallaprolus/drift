@@ -1,5 +1,6 @@
-import * as vscode from 'vscode';
-import { LanguageParser, DocCodePair } from '../models/types';
+import { LanguageParser, DocCodePair, RangeFactory, SourceDocument } from '../models/types';
+import { BaseParser } from './baseParser';
+import { isFileIgnored, isPairIgnored } from '../analyzers/ignore';
 import { TypeScriptParser } from './typescriptParser';
 import { PythonParser } from './pythonParser';
 import { GoParser } from './goParser';
@@ -65,7 +66,7 @@ export class ParserRegistry {
     /**
      * Get parser for a document
      */
-    getParser(document: vscode.TextDocument): LanguageParser | undefined {
+    getParser(document: SourceDocument): LanguageParser | undefined {
         // First try by language ID
         let parser = this.parsers.get(document.languageId);
 
@@ -79,6 +80,24 @@ export class ParserRegistry {
         }
 
         return parser;
+    }
+
+    /**
+     * Install a range factory on every parser (the extension uses vscode.Range)
+     */
+    setRangeFactory(factory: RangeFactory): void {
+        for (const parser of new Set(this.parsers.values())) {
+            if (parser instanceof BaseParser) {
+                parser.setRangeFactory(factory);
+            }
+        }
+    }
+
+    /**
+     * Language ID for a file path based on its extension, if supported
+     */
+    getLanguageIdForPath(filePath: string): string | undefined {
+        return this.extensionMap.get(this.getFileExtension(filePath));
     }
 
     /**
@@ -105,7 +124,7 @@ export class ParserRegistry {
     /**
      * Parse a document and return doc-code pairs
      */
-    async parseDocument(document: vscode.TextDocument): Promise<DocCodePair[]> {
+    async parseDocument(document: SourceDocument): Promise<DocCodePair[]> {
         const parser = this.getParser(document);
 
         if (!parser) {
@@ -113,7 +132,13 @@ export class ParserRegistry {
         }
 
         try {
-            return await parser.parseDocCodePairs(document);
+            const text = document.getText();
+            if (isFileIgnored(text)) {
+                return [];
+            }
+            const lines = text.split('\n');
+            const pairs = await parser.parseDocCodePairs(document);
+            return pairs.filter(pair => !isPairIgnored(lines, pair.docRange, pair.docContent));
         } catch (error) {
             DriftLogger.error(`Error parsing document ${document.uri.fsPath}:`, error);
             return [];

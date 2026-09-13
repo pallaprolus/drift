@@ -4,10 +4,7 @@ import * as path from 'path';
 import { DocCodePair, DocCodePairState, DriftState } from '../models/types';
 import { hashContent } from '../utils/helpers';
 import { DriftLogger } from '../utils/logger';
-
-const STATE_VERSION = '1.0.0';
-const STATE_DIR = '.drift';
-const STATE_FILE = 'state.json';
+import { STATE_VERSION, isPairReviewed, readDriftStateFile, stateFilePathFor } from '../state/driftStateFile';
 
 /**
  * Manages persistent drift state in .drift/state.json
@@ -35,8 +32,7 @@ export class StateManager {
         }
 
         const rootPath = workspaceFolders[0].uri.fsPath;
-        const stateDir = path.join(rootPath, STATE_DIR);
-        this.stateFilePath = path.join(stateDir, STATE_FILE);
+        this.stateFilePath = stateFilePathFor(rootPath);
 
         // Load existing state if it exists
         await this.loadState();
@@ -46,20 +42,12 @@ export class StateManager {
      * Load state from disk
      */
     private async loadState(): Promise<void> {
-        if (!this.stateFilePath) {return;}
+        if (!this.stateFilePath) {
+            return;
+        }
 
         try {
-            if (fs.existsSync(this.stateFilePath)) {
-                const content = fs.readFileSync(this.stateFilePath, 'utf-8');
-                const data = JSON.parse(content);
-
-                // Convert pairs object back to Map
-                this.state = {
-                    version: data.version || STATE_VERSION,
-                    pairs: new Map(Object.entries(data.pairs || {})),
-                    lastFullScan: data.lastFullScan ? new Date(data.lastFullScan) : undefined
-                };
-            }
+            this.state = readDriftStateFile(path.dirname(path.dirname(this.stateFilePath)));
         } catch (error) {
             DriftLogger.error('Error loading drift state:', error);
             // Start with fresh state if file is corrupted
@@ -68,6 +56,13 @@ export class StateManager {
                 pairs: new Map()
             };
         }
+    }
+
+    /**
+     * Whether a pair was reviewed against its current code
+     */
+    isReviewed(pair: DocCodePair): boolean {
+        return isPairReviewed(this.state, pair);
     }
 
     /**
