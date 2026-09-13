@@ -45,10 +45,12 @@ runs:
         DRIFT_SUMMARY: ${{ inputs.summary }}
       run: |
         CLI="$GITHUB_ACTION_PATH/dist/cli.js"
+        # Parse the args input with shell quoting rules so --exclude "**/glob/**" works as written
+        eval "set -- $DRIFT_ARGS"
         set +e
-        node "$CLI" "$DRIFT_PATH" --fail-on "$DRIFT_FAIL_ON" --threshold "$DRIFT_THRESHOLD" $DRIFT_ARGS
+        node "$CLI" "$DRIFT_PATH" --fail-on "$DRIFT_FAIL_ON" --threshold "$DRIFT_THRESHOLD" "$@"
         STATUS=$?
         if [ "$DRIFT_SUMMARY" = "true" ] && [ -n "$GITHUB_STEP_SUMMARY" ]; then
-          node "$CLI" "$DRIFT_PATH" --fail-on none --threshold "$DRIFT_THRESHOLD" --format markdown --quiet $DRIFT_ARGS >> "$GITHUB_STEP_SUMMARY" || true
+          node "$CLI" "$DRIFT_PATH" --fail-on none --threshold "$DRIFT_THRESHOLD" --format markdown --quiet "$@" >> "$GITHUB_STEP_SUMMARY" || true
         fi
         exit $STATUS
