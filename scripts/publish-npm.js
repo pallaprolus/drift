@@ -46,7 +46,8 @@ fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
 }, null, 2) + '\n');
 
 const dryRun = process.argv.includes('--dry-run');
-// Provenance needs the OIDC token that only GitHub Actions provides
+// In GitHub Actions, npm Trusted Publishing authenticates via OIDC and attaches
+// provenance automatically; locally, npm uses your login session and asks for 2FA.
 const provenance = process.env.GITHUB_ACTIONS ? ' --provenance' : '';
 const cmd = dryRun ? 'npm pack --dry-run' : `npm publish${provenance} --access public`;
 console.log(`${dryRun ? 'Packing' : 'Publishing'} drift-docs@${manifest.version} from ${dir}`);

@@ -64,7 +64,6 @@ jobs:
       VERSION: ${{ needs.check-version.outputs.version }}
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
       OVSX_PAT: ${{ secrets.OVSX_PAT }}
-      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -96,11 +95,14 @@ jobs:
         if: env.OVSX_PAT != ''
         run: npx --yes ovsx publish "drift-$VERSION.vsix" -p "$OVSX_PAT"
 
+      # npm Trusted Publishing (OIDC): no token. Requires the trusted publisher to be
+      # configured on npmjs.com for drift-docs (owner pallaprolus, repo drift,
+      # workflow publish.yml) and the repository variable NPM_TRUSTED_PUBLISHING=true.
       - name: Publish CLI to npm (drift-docs)
-        if: env.NPM_TOKEN != ''
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: node scripts/publish-npm.js
+        if: vars.NPM_TRUSTED_PUBLISHING == 'true'
+        run: |
+          npm install -g npm@latest   # trusted publishing needs npm >= 11.5.1
+          node scripts/publish-npm.js
 
       - name: Release notes from CHANGELOG
         run: |
