@@ -2,6 +2,11 @@
 
 All notable changes to the Drift extension are documented here.
 
+## [0.7.3] - 2026-09-13
+
+### Changed
+- `docs-drift` releases now come from the release workflow through npm Trusted Publishing, with a provenance attestation linking each version to its source commit and build. No publishing tokens exist anywhere.
+
 ## [0.7.2] - 2026-09-13
 
 ### Changed

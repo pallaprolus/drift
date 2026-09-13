@@ -2,7 +2,7 @@
   "name": "drift",
   "displayName": "Drift - Documentation Sync Detector",
   "description": "Detect when documentation drifts out of sync with your code: JSDoc, docstrings, README code blocks, Git history, and optional AI semantic checks",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "publisher": "pallaprolus",
   "pricing": "Free",
   "icon": "images/icon.png",
