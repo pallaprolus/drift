@@ -37,7 +37,7 @@ fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
     license: manifest.license,
     author: 'Sudhakar Pallaprolu',
     homepage: manifest.homepage,
-    repository: manifest.repository,
+    repository: { type: 'git', url: 'git+https://github.com/pallaprolus/drift.git' },
     bugs: manifest.bugs,
     bin: { 'drift-docs': 'dist/cli.js', 'drift-check': 'dist/cli.js' },
     files: ['dist/cli.js', 'CHANGELOG.md'],
