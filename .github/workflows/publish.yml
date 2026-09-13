@@ -59,10 +59,12 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      id-token: write   # npm provenance
     env:
       VERSION: ${{ needs.check-version.outputs.version }}
       VSCE_PAT: ${{ secrets.VSCE_PAT }}
       OVSX_PAT: ${{ secrets.OVSX_PAT }}
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -70,6 +72,7 @@ jobs:
         with:
           node-version: '20'
           cache: npm
+          registry-url: 'https://registry.npmjs.org'
       - run: npm ci
 
       - name: Build and package (deps are bundled by esbuild)
@@ -81,7 +84,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "v$VERSION" -m "Release v$VERSION"
           git push origin "v$VERSION"
-          # Floating major tag for `uses: pallaprolus/drift-vscode@v0` in workflows
+          # Floating major tag for `uses: pallaprolus/drift@v0` in workflows
           MAJOR="v${VERSION%%.*}"
           git tag -f "$MAJOR" -m "Latest $MAJOR release ($VERSION)"
           git push -f origin "$MAJOR"
@@ -92,6 +95,12 @@ jobs:
       - name: Publish to Open VSX
         if: env.OVSX_PAT != ''
         run: npx --yes ovsx publish "drift-$VERSION.vsix" -p "$OVSX_PAT"
+
+      - name: Publish CLI to npm (drift-docs)
+        if: env.NPM_TOKEN != ''
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: node scripts/publish-npm.js
 
       - name: Release notes from CHANGELOG
         run: |

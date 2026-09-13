@@ -2,7 +2,7 @@
   "name": "drift",
   "displayName": "Drift - Documentation Sync Detector",
   "description": "Detect when documentation drifts out of sync with your code: JSDoc, docstrings, README code blocks, Git history, and optional AI semantic checks",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "publisher": "pallaprolus",
   "pricing": "Free",
   "icon": "images/icon.png",
@@ -32,18 +32,18 @@
       "description": "Open VSX version"
     },
     {
-      "url": "https://img.shields.io/github/actions/workflow/status/pallaprolus/drift-vscode/test.yml?branch=main&label=tests",
-      "href": "https://github.com/pallaprolus/drift-vscode/actions/workflows/test.yml",
+      "url": "https://img.shields.io/github/actions/workflow/status/pallaprolus/drift/test.yml?branch=main&label=tests",
+      "href": "https://github.com/pallaprolus/drift/actions/workflows/test.yml",
       "description": "Test status"
     }
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/pallaprolus/drift-vscode"
+    "url": "https://github.com/pallaprolus/drift"
   },
-  "homepage": "https://github.com/pallaprolus/drift-vscode#readme",
+  "homepage": "https://github.com/pallaprolus/drift#readme",
   "bugs": {
-    "url": "https://github.com/pallaprolus/drift-vscode/issues"
+    "url": "https://github.com/pallaprolus/drift/issues"
   },
   "license": "MIT",
   "engines": {
@@ -295,7 +295,8 @@
     "test": "node ./out/test/runTest.js",
     "test:unit": "tsc -p . --outDir out && node runUnitTests.js",
     "build:cli": "node esbuild.js --cli",
-    "prepare": "node esbuild.js --cli"
+    "prepare": "node esbuild.js --cli",
+    "publish:npm": "node scripts/publish-npm.js"
   },
   "devDependencies": {
     "@anthropic-ai/sdk": "^0.124.0",

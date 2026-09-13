@@ -6,10 +6,20 @@
 [![Installs](https://vsmarketplacebadges.dev/installs-short/pallaprolus.drift.svg)](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift)
 [![Rating](https://vsmarketplacebadges.dev/rating-short/pallaprolus.drift.svg)](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift&ssr=false#review-details)
 [![Open VSX](https://img.shields.io/open-vsx/v/pallaprolus/drift?label=open%20vsx)](https://open-vsx.org/extension/pallaprolus/drift)
-[![Tests](https://img.shields.io/github/actions/workflow/status/pallaprolus/drift-vscode/test.yml?branch=main&label=tests)](https://github.com/pallaprolus/drift-vscode/actions/workflows/test.yml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/pallaprolus/drift/test.yml?branch=main&label=tests)](https://github.com/pallaprolus/drift/actions/workflows/test.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **Drift** detects when your documentation drifts out of sync with your code. It pairs documentation blocks (JSDoc, docstrings, README code blocks, etc.) with their code anchors and flags potential staleness when the code changes.
+
+One engine, three ways to run it:
+
+| Surface | Best for | Install |
+|---------|----------|---------|
+| **VS Code extension** | Seeing drift while you edit: dashboard, gutter marks, hovers, quick fixes, AI checks | [Marketplace](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift) · [Open VSX](https://open-vsx.org/extension/pallaprolus/drift) · `code --install-extension pallaprolus.drift` |
+| **Command line** (`drift-docs`) | Pre-commit hooks, local audits, any CI system | `npx drift-docs` (see [CI section](#-ci-command-line-and-github-action)) |
+| **GitHub Action** | Failing pull requests that leave docs behind, with a job summary | `uses: pallaprolus/drift@v0` |
+
+All three share the same parsers, analyzers, thresholds, ignore markers, and `.drift/state.json` review state, so what CI reports is exactly what the editor shows.
 
 ## Features
 
@@ -101,8 +111,10 @@ function legacy(a: string, b?: string) {}
 The same checks run outside the editor. Run it on any repository without installing anything:
 
 ```bash
-npx github:pallaprolus/drift-vscode --fail-on high
+npx drift-docs --fail-on high
 ```
+
+Or install it globally (`npm install -g drift-docs`), which provides both `drift-docs` and `drift-check`.
 
 ```text
 src/lib.ts
@@ -121,7 +133,7 @@ Or add it to a workflow. The action writes a Markdown report to the job summary:
 - uses: actions/checkout@v4
   with:
     fetch-depth: 0   # full history lets the Git checks work
-- uses: pallaprolus/drift-vscode@v0   # or pin a release tag such as v0.7.1
+- uses: pallaprolus/drift@v0   # or pin a release tag such as v0.7.1
   with:
     fail-on: high
 ```
@@ -305,8 +317,8 @@ Contributions are welcome! Open an issue first for larger changes so we can agre
 
 ```bash
 # Clone the repository
-git clone https://github.com/pallaprolus/drift-vscode.git
-cd drift-vscode
+git clone https://github.com/pallaprolus/drift.git
+cd drift
 
 # Install dependencies
 npm install
@@ -349,4 +361,4 @@ Built with ❤️ using the VS Code Extension API.
 
 ---
 
-**Found a bug or have a suggestion?** [Open an issue](https://github.com/pallaprolus/drift-vscode/issues)
+**Found a bug or have a suggestion?** [Open an issue](https://github.com/pallaprolus/drift/issues)
