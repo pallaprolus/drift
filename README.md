@@ -280,18 +280,6 @@ To add support for a new language:
 2. Implement `parseDocCodePairs()` and `extractCodeSignature()`
 3. Register the parser in `ParserRegistry`
 
-## Roadmap
-
-- [x] Go support
-- [x] Rust support
-- [x] Java support
-- [x] README code block synchronization
-- [x] AI-powered semantic drift detection
-- [x] Git integration for change tracking
-- [x] Export reports (HTML, Markdown, JSON)
-
-Ideas for what comes next are tracked in [GitHub issues](https://github.com/pallaprolus/drift-vscode/issues). C/C++ support and a CI-friendly command-line runner are the most requested.
-
 ## Community & Impact
  
 Drift is built to help developers maintain high-quality documentation. If this tool has saved you time or prevented bugs, I'd love to hear your story!
