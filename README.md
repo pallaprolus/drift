@@ -16,7 +16,7 @@ One engine, three ways to run it:
 | Surface | Best for | Install |
 |---------|----------|---------|
 | **VS Code extension** | Seeing drift while you edit: dashboard, gutter marks, hovers, quick fixes, AI checks | [Marketplace](https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift) · [Open VSX](https://open-vsx.org/extension/pallaprolus/drift) · `code --install-extension pallaprolus.drift` |
-| **Command line** (`drift-docs`) | Pre-commit hooks, local audits, any CI system | `npx drift-docs` (see [CI section](#-ci-command-line-and-github-action)) |
+| **Command line** (`docs-drift`) | Pre-commit hooks, local audits, any CI system | `npx docs-drift` (see [CI section](#-ci-command-line-and-github-action)) |
 | **GitHub Action** | Failing pull requests that leave docs behind, with a job summary | `uses: pallaprolus/drift@v0` |
 
 All three share the same parsers, analyzers, thresholds, ignore markers, and `.drift/state.json` review state, so what CI reports is exactly what the editor shows.
@@ -111,10 +111,10 @@ function legacy(a: string, b?: string) {}
 The same checks run outside the editor. Run it on any repository without installing anything:
 
 ```bash
-npx drift-docs --fail-on high
+npx docs-drift --fail-on high
 ```
 
-Or install it globally (`npm install -g drift-docs`), which provides both `drift-docs` and `drift-check`.
+Or install it globally (`npm install -g docs-drift`), which provides both `docs-drift` and `drift-check`.
 
 ```text
 src/lib.ts

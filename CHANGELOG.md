@@ -5,8 +5,8 @@ All notable changes to the Drift extension are documented here.
 ## [0.7.2] - 2026-09-13
 
 ### Changed
-- The repository is now [pallaprolus/drift](https://github.com/pallaprolus/drift); the old `drift-vscode` URL redirects. Drift is one engine with three surfaces: the VS Code extension, the `drift-docs` command-line runner, and the GitHub Action.
-- The CLI is published to npm as `drift-docs` (via npm Trusted Publishing, no stored token), so `npx drift-docs` works without referencing the repository. Workflows use `pallaprolus/drift@v0`.
+- The repository is now [pallaprolus/drift](https://github.com/pallaprolus/drift); the old `drift-vscode` URL redirects. Drift is one engine with three surfaces: the VS Code extension, the `docs-drift` command-line runner, and the GitHub Action.
+- The CLI is published to npm as `docs-drift` (via npm Trusted Publishing, no stored token), so `npx docs-drift` works without referencing the repository. Workflows use `pallaprolus/drift@v0`.
 - README reorganized by surface.
 
 ## [0.7.1] - 2026-09-13

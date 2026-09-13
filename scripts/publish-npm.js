@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Publish the command-line runner to npm as `drift-docs`.
+ * Publish the command-line runner to npm as `docs-drift`.
  *
  * The repository's package.json is the VS Code extension manifest (name "drift").
  * This script assembles a minimal npm package in a temp directory with the built
@@ -22,7 +22,7 @@ if (!fs.existsSync(cli)) {
     process.exit(1);
 }
 
-const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'drift-docs-'));
+const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'docs-drift-'));
 fs.mkdirSync(path.join(dir, 'dist'));
 fs.copyFileSync(cli, path.join(dir, 'dist', 'cli.js'));
 for (const file of ['README.md', 'LICENSE', 'CHANGELOG.md']) {
@@ -30,7 +30,7 @@ for (const file of ['README.md', 'LICENSE', 'CHANGELOG.md']) {
 }
 
 fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
-    name: 'drift-docs',
+    name: 'docs-drift',
     version: manifest.version,
     description: 'Find documentation that drifted out of sync with the code: JSDoc, docstrings, README code blocks, Git history. CLI and CI companion to the Drift VS Code extension.',
     keywords: ['documentation', 'docs', 'lint', 'drift', 'jsdoc', 'docstring', 'readme', 'ci', 'cli'],
@@ -39,7 +39,7 @@ fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
     homepage: manifest.homepage,
     repository: { type: 'git', url: 'git+https://github.com/pallaprolus/drift.git' },
     bugs: manifest.bugs,
-    bin: { 'drift-docs': 'dist/cli.js', 'drift-check': 'dist/cli.js' },
+    bin: { 'docs-drift': 'dist/cli.js', 'drift-check': 'dist/cli.js' },
     files: ['dist/cli.js', 'CHANGELOG.md'],
     engines: { node: '>=18' },
     publishConfig: { access: 'public' }
@@ -50,5 +50,5 @@ const dryRun = process.argv.includes('--dry-run');
 // provenance automatically; locally, npm uses your login session and asks for 2FA.
 const provenance = process.env.GITHUB_ACTIONS ? ' --provenance' : '';
 const cmd = dryRun ? 'npm pack --dry-run' : `npm publish${provenance} --access public`;
-console.log(`${dryRun ? 'Packing' : 'Publishing'} drift-docs@${manifest.version} from ${dir}`);
+console.log(`${dryRun ? 'Packing' : 'Publishing'} docs-drift@${manifest.version} from ${dir}`);
 execSync(cmd, { cwd: dir, stdio: 'inherit', env: { ...process.env } });
