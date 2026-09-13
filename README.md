@@ -121,7 +121,7 @@ Or add it to a workflow. The action writes a Markdown report to the job summary:
 - uses: actions/checkout@v4
   with:
     fetch-depth: 0   # full history lets the Git checks work
-- uses: pallaprolus/drift-vscode@v0.7.0
+- uses: pallaprolus/drift-vscode@v0   # or pin a release tag such as v0.7.1
   with:
     fail-on: high
 ```

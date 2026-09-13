@@ -81,6 +81,10 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -a "v$VERSION" -m "Release v$VERSION"
           git push origin "v$VERSION"
+          # Floating major tag for `uses: pallaprolus/drift-vscode@v0` in workflows
+          MAJOR="v${VERSION%%.*}"
+          git tag -f "$MAJOR" -m "Latest $MAJOR release ($VERSION)"
+          git push -f origin "$MAJOR"
 
       - name: Publish to VS Code Marketplace
         run: npx @vscode/vsce publish --packagePath "drift-$VERSION.vsix" -p "$VSCE_PAT"

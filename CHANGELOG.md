@@ -2,6 +2,12 @@
 
 All notable changes to the Drift extension are documented here.
 
+## [0.7.1] - 2026-09-13
+
+### Fixed
+- GitHub Action: quoted values in the `args` input (for example `--exclude "**/test/**"`) are now parsed with shell quoting instead of being passed through literally, so excludes work as written.
+- Releases now also move a floating `v0` tag, so workflows can use `pallaprolus/drift-vscode@v0` and pick up fixes automatically.
+
 ## [0.7.0] - 2026-09-13
 
 ### Added
