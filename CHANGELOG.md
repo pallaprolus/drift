@@ -2,6 +2,16 @@
 
 All notable changes to the Drift extension are documented here.
 
+## [0.6.1] - 2026-09-12
+
+Marketplace listing improvements, no functional changes.
+
+### Changed
+- Listed under Programming Languages, Linters, and AI (previously Linters only).
+- Tags now include the supported languages and doc formats so searches like "python docstring" or "typescript jsdoc" find Drift.
+- Added Marketplace, Open VSX, test-status, and license badges; gallery banner; Free pricing label.
+- Releases are automated: a version bump on `main` publishes to the Marketplace and Open VSX and creates the GitHub release.
+
 ## [0.6.0] - 2026-09-07
 
 This release completes the original roadmap.

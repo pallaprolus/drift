@@ -2,31 +2,79 @@
   "name": "drift",
   "displayName": "Drift - Documentation Sync Detector",
   "description": "Detect when documentation drifts out of sync with your code: JSDoc, docstrings, README code blocks, Git history, and optional AI semantic checks",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "publisher": "pallaprolus",
+  "pricing": "Free",
   "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#0b1f3a",
+    "theme": "dark"
+  },
+  "badges": [
+    {
+      "url": "https://img.shields.io/visual-studio-marketplace/v/pallaprolus.drift?label=marketplace",
+      "href": "https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift",
+      "description": "VS Code Marketplace version"
+    },
+    {
+      "url": "https://img.shields.io/visual-studio-marketplace/i/pallaprolus.drift",
+      "href": "https://marketplace.visualstudio.com/items?itemName=pallaprolus.drift",
+      "description": "Marketplace installs"
+    },
+    {
+      "url": "https://img.shields.io/open-vsx/v/pallaprolus/drift?label=open%20vsx",
+      "href": "https://open-vsx.org/extension/pallaprolus/drift",
+      "description": "Open VSX version"
+    },
+    {
+      "url": "https://img.shields.io/github/actions/workflow/status/pallaprolus/drift-vscode/test.yml?branch=main&label=tests",
+      "href": "https://github.com/pallaprolus/drift-vscode/actions/workflows/test.yml",
+      "description": "Test status"
+    }
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/pallaprolus/drift-vscode"
   },
+  "homepage": "https://github.com/pallaprolus/drift-vscode#readme",
+  "bugs": {
+    "url": "https://github.com/pallaprolus/drift-vscode/issues"
+  },
+  "license": "MIT",
   "engines": {
     "vscode": "^1.90.0"
   },
   "categories": [
-    "Other",
-    "Linters"
+    "Programming Languages",
+    "Linters",
+    "AI"
   ],
   "keywords": [
     "documentation",
     "docs",
-    "sync",
-    "drift",
-    "comments",
-    "maintenance",
-    "readme",
-    "jsdoc",
+    "documentation drift",
+    "stale docs",
     "docstring",
-    "ai"
+    "jsdoc",
+    "javadoc",
+    "godoc",
+    "rustdoc",
+    "comments",
+    "readme",
+    "markdown",
+    "code review",
+    "technical debt",
+    "maintenance",
+    "git",
+    "typescript",
+    "javascript",
+    "python",
+    "go",
+    "rust",
+    "java",
+    "ai",
+    "sync",
+    "drift"
   ],
   "activationEvents": [
     "onStartupFinished"
@@ -254,10 +302,5 @@
     "minimatch": "^9.0.3",
     "mocha": "^11.7.5",
     "typescript": "^5.3.0"
-  },
-  "bugs": {
-    "url": "https://github.com/pallaprolus/drift-vscode/issues"
-  },
-  "homepage": "https://github.com/pallaprolus/drift-vscode#readme",
-  "license": "MIT"
+  }
 }
