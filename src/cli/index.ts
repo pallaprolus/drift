@@ -1,5 +1,5 @@
 /**
- * drift-check: command-line documentation drift checker.
+ * docs-drift: command-line documentation drift checker.
  *
  * Runs the same parsers and analyzers as the VS Code extension without the
  * editor, for CI pipelines and pre-commit hooks.
@@ -49,9 +49,9 @@ const SEVERITY_RANK: Record<DriftSeverity, number> = {
     [DriftSeverity.Critical]: 3
 };
 
-export const HELP = `drift-check - find documentation that drifted out of sync with the code
+export const HELP = `docs-drift - find documentation that drifted out of sync with the code
 
-Usage: drift-check [paths...] [options]
+Usage: docs-drift [paths...] [options]
 
 Options:
   -f, --format <fmt>      text (default), markdown, html, json
@@ -390,7 +390,7 @@ async function main(): Promise<void> {
     try {
         options = parseArgs(process.argv.slice(2));
     } catch (error) {
-        console.error(`drift-check: ${error instanceof Error ? error.message : String(error)}\n`);
+        console.error(`docs-drift: ${error instanceof Error ? error.message : String(error)}\n`);
         console.error(HELP);
         process.exit(2);
     }
@@ -417,7 +417,7 @@ async function main(): Promise<void> {
         }
         process.exit(result.failed ? 1 : 0);
     } catch (error) {
-        console.error(`drift-check: ${error instanceof Error ? error.message : String(error)}`);
+        console.error(`docs-drift: ${error instanceof Error ? error.message : String(error)}`);
         process.exit(2);
     }
 }

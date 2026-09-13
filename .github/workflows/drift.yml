@@ -19,5 +19,5 @@ jobs:
           node-version: '20'
       - uses: ./
         with:
-          fail-on: none
+          fail-on: high
           args: --exclude "**/src/test/**" --exclude "**/examples/**"

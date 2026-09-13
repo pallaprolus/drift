@@ -111,6 +111,8 @@ export class JavaParser extends BaseParser {
 
     /**
      * Extract signature from Java method definition
+     * @param content - The method declaration line(s)
+     * @param _range - Location of the declaration (unused)
      */
     extractCodeSignature(content: string, _range: TextRange): CodeSignature {
         const signature: CodeSignature = {

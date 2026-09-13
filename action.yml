@@ -19,7 +19,7 @@ inputs:
     required: false
     default: '0.3'
   args:
-    description: 'Extra arguments passed to drift-check (for example --no-git --exclude "**/fixtures/**")'
+    description: 'Extra arguments passed to docs-drift (for example --no-git --exclude "**/fixtures/**")'
     required: false
     default: ''
   summary:
@@ -30,12 +30,12 @@ inputs:
 runs:
   using: 'composite'
   steps:
-    - name: Build drift-check
+    - name: Build docs-drift
       shell: bash
       run: |
         cd "$GITHUB_ACTION_PATH"
         npm ci --no-audit --no-fund --loglevel=error
-    - name: Run drift-check
+    - name: Run docs-drift
       shell: bash
       env:
         DRIFT_PATH: ${{ inputs.path }}

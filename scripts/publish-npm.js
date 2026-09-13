@@ -39,7 +39,7 @@ fs.writeFileSync(path.join(dir, 'package.json'), JSON.stringify({
     homepage: manifest.homepage,
     repository: { type: 'git', url: 'git+https://github.com/pallaprolus/drift.git' },
     bugs: manifest.bugs,
-    bin: { 'docs-drift': 'dist/cli.js', 'drift-check': 'dist/cli.js' },
+    bin: { 'docs-drift': 'dist/cli.js' },
     files: ['dist/cli.js', 'CHANGELOG.md'],
     engines: { node: '>=18' },
     publishConfig: { access: 'public' }

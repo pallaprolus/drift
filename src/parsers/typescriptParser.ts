@@ -254,6 +254,7 @@ export class TypeScriptParser extends BaseParser {
     
     /**
      * Parse parameter string into ParameterInfo array
+     * @param paramsStr - Comma-separated parameter list without the surrounding parentheses
      */
     private parseParameters(paramsStr: string): ParameterInfo[] {
         const params: ParameterInfo[] = [];
@@ -295,6 +296,7 @@ export class TypeScriptParser extends BaseParser {
     
     /**
      * Parse a single parameter
+     * @param paramStr - One parameter declaration, e.g. `name?: string = 'x'`
      */
     private parseParameter(paramStr: string): ParameterInfo | null {
         const trimmed = paramStr.trim();

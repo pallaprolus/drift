@@ -35,6 +35,8 @@ export interface DriftApi {
 
 /**
  * Extension activation
+ * @param context - Extension context used for subscriptions and secret storage
+ * @returns A small API used by integration tests and other extensions
  */
 export async function activate(context: vscode.ExtensionContext): Promise<DriftApi> {
     const outputChannel = vscode.window.createOutputChannel('Drift');
@@ -63,6 +65,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<DriftA
     // Initialize components
     scanner = new WorkspaceScanner(config, pair => stateManager.isReviewed(pair));
     dashboardProvider = new DriftDashboardProvider();
+    dashboardProvider.setThreshold(config.driftThreshold);
     decorationProvider = new DecorationProvider();
     diagnosticsProvider = new DiagnosticsProvider();
     diagnosticsProvider.configure({ enabled: config.showInProblems, threshold: config.driftThreshold });
@@ -192,6 +195,7 @@ function loadConfig(): DriftConfig {
 
 /**
  * Register all commands
+ * @param context - Extension context that owns the command disposables
  */
 function registerCommands(context: vscode.ExtensionContext): void {
     // Scan workspace command
@@ -537,6 +541,8 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
 /**
  * Register event listeners
+ * @param context - Extension context that owns the listener disposables
+ * @param _config - Initial configuration (listeners re-read settings on change)
  */
 function registerEventListeners(context: vscode.ExtensionContext, _config: DriftConfig): void {
     // Debounced document change handler
@@ -601,6 +607,7 @@ function registerEventListeners(context: vscode.ExtensionContext, _config: Drift
                 const newConfig = loadConfig();
                 scanner.updateConfig(newConfig);
                 diagnosticsProvider.configure({ enabled: newConfig.showInProblems, threshold: newConfig.driftThreshold });
+                dashboardProvider.setThreshold(newConfig.driftThreshold);
                 updateDecorationsForVisibleEditors();
                 codeLensProvider.refresh();
                 syncAllDiagnostics();
@@ -759,6 +766,8 @@ async function scanOpenDocuments(): Promise<void> {
 
 /**
  * Update decorations for a specific editor
+ * @param editor - Editor whose document was scanned
+ * @param pairs - Analyzed doc-code pairs for that document
  */
 function updateDecorationsForEditor(editor: vscode.TextEditor, pairs: DocCodePair[]): void {
     if (editor.document.uri.scheme === 'file') {

@@ -4,7 +4,8 @@ import * as path from 'path';
 import { toVsRange } from './vscodeRanges';
 
 /**
- * Tree item representing a drift issue in the dashboard
+ * Tree item representing a drift issue in the dashboard.
+ * Shown expanded by default so the drift reasons are visible without clicking.
  */
 export class DriftTreeItem extends vscode.TreeItem {
     constructor(
@@ -16,7 +17,7 @@ export class DriftTreeItem extends vscode.TreeItem {
         
         super(
             `${icon} ${pair.codeSignature.name}`,
-            vscode.TreeItemCollapsibleState.Collapsed
+            vscode.TreeItemCollapsibleState.Expanded
         );
         
         // Set relative file path as description
@@ -158,8 +159,10 @@ export class DriftDashboardProvider implements vscode.TreeDataProvider<vscode.Tr
     readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
     
     private pairs: DocCodePair[] = [];
+    private allPairs: DocCodePair[] = [];
     private groupByFile = true;
     private workspaceFolder: string = '';
+    private threshold = 0;
     
     constructor() {
         const folders = vscode.workspace.workspaceFolders;
@@ -172,12 +175,22 @@ export class DriftDashboardProvider implements vscode.TreeDataProvider<vscode.Tr
      * Update the pairs displayed in the dashboard
      */
     updatePairs(pairs: DocCodePair[]): void {
-        // Sort by drift score descending
+        this.allPairs = pairs;
+        // Same threshold as the decorations, Problems panel, and CLI; sorted by drift score descending
         this.pairs = pairs
-            .filter(p => !p.isReviewed && p.driftScore > 0)
+            .filter(p => !p.isReviewed && p.driftScore > 0 && p.driftScore >= this.threshold)
             .sort((a, b) => b.driftScore - a.driftScore);
         
         this._onDidChangeTreeData.fire();
+    }
+
+    /**
+     * Set the minimum drift score shown, then re-apply it to the current results
+     * @param threshold - Value of the drift.driftThreshold setting (0-1)
+     */
+    setThreshold(threshold: number): void {
+        this.threshold = threshold;
+        this.updatePairs(this.allPairs);
     }
     
     /**

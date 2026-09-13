@@ -405,6 +405,7 @@ export abstract class BaseParser implements LanguageParser {
 
     /**
      * Parse Rust doc comments (//! or ///)
+     * @param content - Raw comment text including the comment markers
      */
     protected parseRustDocStyle(content: string): ParsedDoc {
         const result: ParsedDoc = {

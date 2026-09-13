@@ -43,7 +43,7 @@ suite('CLI: parseArgs', () => {
         assert.throws(() => parseArgs(['--fail-on', 'fatal']), /--fail-on/);
         assert.throws(() => parseArgs(['--bogus']), /Unknown option/);
         assert.throws(() => parseArgs(['--output']), /requires a value/);
-        assert.match(HELP, /drift-check/);
+        assert.match(HELP, /docs-drift/);
     });
 });
 
@@ -103,7 +103,7 @@ suite('CLI: end to end on the fixture workspace', () => {
         assert.strictEqual(r.status, 0, r.stderr);
         assert.match(r.stdout, /No documentation drift/);
         assert.strictEqual(runCli(['--help']).status, 0);
-        assert.match(runCli(['--help']).stdout, /Usage: drift-check/);
+        assert.match(runCli(['--help']).stdout, /Usage: docs-drift/);
         assert.strictEqual(runCli(['--version']).stdout.trim(), 'dev');
         assert.strictEqual(runCli(['--nope']).status, 2);
     });

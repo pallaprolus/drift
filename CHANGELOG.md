@@ -2,6 +2,13 @@
 
 All notable changes to the Drift extension are documented here.
 
+## [0.7.4] - 2026-09-13
+
+### Changed
+- The CLI installs a single command, `docs-drift`; the `drift-check` alias from 0.7.3 is gone.
+- Dashboard rows open expanded so the drift reasons are visible at a glance, and the dashboard now honors `drift.driftThreshold` like every other surface.
+- README reorganized by surface, with a screenshot.
+
 ## [0.7.3] - 2026-09-13
 
 ### Changed

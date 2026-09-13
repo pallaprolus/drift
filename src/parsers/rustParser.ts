@@ -104,6 +104,8 @@ export class RustParser extends BaseParser {
 
     /**
      * Extract signature from Rust function definition
+     * @param content - The fn declaration line(s)
+     * @param _range - Location of the declaration (unused)
      */
     extractCodeSignature(content: string, _range: TextRange): CodeSignature {
         const signature: CodeSignature = {
