@@ -302,7 +302,7 @@ export class DriftAnalyzer {
         let score = 0;
 
         for (const reason of reasons) {
-            let weight = 0;
+            let weight: number;
 
             switch (reason.type) {
                 case DriftType.ParameterMismatch:

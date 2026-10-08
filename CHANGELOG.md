@@ -2,6 +2,14 @@
 
 All notable changes to the Drift extension are documented here.
 
+## [Unreleased]
+
+### Changed
+- AI semantic checks default to `claude-opus-5-5` (setting `drift.ai.model`). With the VS Code language model provider, any GPT model is now preferred over an unknown one when no Claude model is available, not only GPT-4.
+- NumPy-style Python docstrings: parameter descriptions are now read from the indented lines under each `name : type` entry instead of being left empty, so AI checks see them.
+- Development tooling updated: ESLint 10 with a flat config, typescript-eslint 8, mocha 12, esbuild 0.28, vsce 4 (publishing needs Node 22, which the release job already uses), Anthropic SDK 0.132.
+- Removed compiled `.js` / `.d.ts` / source-map files from `examples/`.
+
 ## [0.7.4] - 2026-09-13
 
 ### Changed

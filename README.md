@@ -174,7 +174,7 @@ Provider notes:
 
   // AI semantic checks: "auto" | "anthropic" | "vscode" | "off"
   "drift.ai.provider": "auto",
-  "drift.ai.model": "claude-opus-5"
+  "drift.ai.model": "claude-opus-5-5"
 }
 ```
 

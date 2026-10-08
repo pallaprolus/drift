@@ -117,6 +117,9 @@ suite('PythonParser Tests', () => {
         assert.strictEqual(parsed.params.length, 2, 'Should find 2 parameters');
         assert.strictEqual(parsed.params[0].name, 'image');
         assert.strictEqual(parsed.params[1].name, 'size');
+        assert.strictEqual(parsed.params[0].description, 'The image to resize.');
+        assert.strictEqual(parsed.params[1].description, 'The target size.');
+        assert.strictEqual(parsed.returns?.description, 'The resized image.');
     });
 
     test('should parse NumPy-style docstrings', () => {
@@ -138,6 +141,116 @@ suite('PythonParser Tests', () => {
         assert.strictEqual(parsed.params[0].type, 'Image');
         assert.strictEqual(parsed.params[1].name, 'size');
         assert.strictEqual(parsed.params[1].type, 'tuple');
+        assert.strictEqual(parsed.params[0].description, 'The image to resize.');
+        assert.strictEqual(parsed.params[1].description, 'The target size.');
+    });
+
+    test('should join multi-line NumPy parameter descriptions', () => {
+        const docContent = `"""
+        Resizes an image.
+
+        Parameters
+        ----------
+        image : Image
+            The image to resize.
+            Its aspect ratio is preserved.
+
+            Note: the original is unchanged.
+        size : tuple
+            The target size.
+        """`;
+
+        const parsed = parser.parseDocumentation(docContent, DocType.PyDoc);
+
+        assert.strictEqual(parsed.params.length, 2);
+        assert.strictEqual(parsed.params[0].description,
+            'The image to resize. Its aspect ratio is preserved. Note: the original is unchanged.');
+        assert.strictEqual(parsed.params[1].description, 'The target size.');
+    });
+
+    test('should stop NumPy parameter descriptions at a Returns section without a blank line', () => {
+        const docContent = `"""
+        Resizes an image.
+
+        Parameters
+        ----------
+        image : Image
+            The image to resize.
+        Returns
+        -------
+        Image
+            The resized image.
+        """`;
+
+        const parsed = parser.parseDocumentation(docContent, DocType.PyDoc);
+
+        assert.strictEqual(parsed.params.length, 1);
+        assert.strictEqual(parsed.params[0].description, 'The image to resize.');
+        assert.strictEqual(parsed.returns?.type, 'Image');
+    });
+
+    test('should preserve NumPy parameters without descriptions before Returns', () => {
+        const docContent = `Parameters
+----------
+x : int
+Returns
+-------
+int`;
+
+        const parsed = parser.parseDocumentation(docContent, DocType.PyDoc);
+
+        assert.strictEqual(parsed.params.length, 1);
+        assert.strictEqual(parsed.params[0].description, '');
+        assert.strictEqual(parsed.returns?.type, 'int');
+    });
+
+    test('should parse optional NumPy types and descriptions', () => {
+        const docContent = `Parameters
+----------
+x : int, optional
+    The number of pixels.
+y : int
+z : str
+    The output mode.`;
+
+        const parsed = parser.parseDocumentation(docContent, DocType.PyDoc);
+
+        assert.deepStrictEqual(parsed.params, [
+            { name: 'x', type: 'int', description: 'The number of pixels.', isOptional: true },
+            { name: 'y', type: 'int', description: '', isOptional: false },
+            { name: 'z', type: 'str', description: 'The output mode.', isOptional: false }
+        ]);
+    });
+
+    test('should stop NumPy descriptions after a blank line followed by a dedent', () => {
+        const docContent = `Parameters
+----------
+x : int
+    The number of pixels.
+
+This is general documentation.
+    This is not part of the parameter description.`;
+
+        const parsed = parser.parseDocumentation(docContent, DocType.PyDoc);
+
+        assert.strictEqual(parsed.params.length, 1);
+        assert.strictEqual(parsed.params[0].description, 'The number of pixels.');
+    });
+
+    test('should stop NumPy descriptions at other section headers', () => {
+        const docContent = `Parameters
+----------
+x : int
+    The number of pixels.
+    Notes
+    -----
+    mode : str
+        This is not a parameter.`;
+
+        const parsed = parser.parseDocumentation(docContent, DocType.PyDoc);
+
+        assert.strictEqual(parsed.params.length, 1);
+        assert.strictEqual(parsed.params[0].description, 'The number of pixels.');
     });
 
     test('should parse Google-style docstrings (Args:)', () => {
@@ -153,5 +266,8 @@ suite('PythonParser Tests', () => {
 
         assert.strictEqual(parsed.params.length, 2, 'Should find 2 parameters');
         assert.strictEqual(parsed.params[0].name, 'image');
+        assert.strictEqual(parsed.params[1].name, 'size');
+        assert.strictEqual(parsed.params[0].description, 'The image to resize.');
+        assert.strictEqual(parsed.params[1].description, 'The target size.');
     });
 });

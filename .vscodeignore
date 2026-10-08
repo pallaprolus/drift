@@ -8,7 +8,7 @@ out/**
 dist/**
 !out/extension.js
 .gitignore
-.eslintrc.js
+eslint.config.mjs
 tsconfig.json
 esbuild.js
 runUnitTests.js
