@@ -16,7 +16,7 @@ jobs:
       should_publish: ${{ steps.check.outputs.should_publish }}
       version: ${{ steps.check.outputs.version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
       - id: check
@@ -42,8 +42,8 @@ jobs:
     if: needs.check-version.outputs.should_publish == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '20'
           cache: npm
@@ -66,8 +66,8 @@ jobs:
       OVSX_PAT: ${{ secrets.OVSX_PAT }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: '22'   # npm trusted publishing needs Node >= 22.14 and npm >= 11.5.1
           cache: npm
@@ -117,7 +117,7 @@ jobs:
       - name: GitHub release
         run: gh release create "v$VERSION" "drift-$VERSION.vsix" --title "v$VERSION" --notes-file /tmp/notes.md --latest
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: drift-v${{ needs.check-version.outputs.version }}
           path: '*.vsix'
