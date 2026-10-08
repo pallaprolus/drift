@@ -12,6 +12,7 @@ eslint.config.mjs
 tsconfig.json
 esbuild.js
 runUnitTests.js
+scripts/**
 package-lock.json
 **/*.map
 **/*.ts
