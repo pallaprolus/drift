@@ -4,7 +4,7 @@ import { DocCodePair, DriftReason, DriftSeverity, DriftType } from '../models/ty
 import { DriftLogger } from '../utils/logger';
 
 export const ANTHROPIC_KEY_SECRET = 'drift.anthropicApiKey';
-export const DEFAULT_ANTHROPIC_MODEL = 'claude-opus-5';
+export const DEFAULT_ANTHROPIC_MODEL = 'claude-opus-5-5';
 
 /**
  * Structured result returned by the model
@@ -177,16 +177,16 @@ export class AnthropicProvider implements SemanticProvider {
                 .join('\n');
         } catch (error) {
             if (error instanceof Anthropic.AuthenticationError) {
-                throw new Error('Anthropic rejected the API key. Run "Drift: Set Anthropic API Key" to update it.');
+                throw new Error('Anthropic rejected the API key. Run "Drift: Set Anthropic API Key" to update it.', { cause: error });
             }
             if (error instanceof Anthropic.RateLimitError) {
-                throw new Error('Anthropic rate limit reached. Try again shortly.');
+                throw new Error('Anthropic rate limit reached. Try again shortly.', { cause: error });
             }
             if (error instanceof Anthropic.NotFoundError) {
-                throw new Error(`Model "${this.getModel()}" was not found. Check the drift.ai.model setting.`);
+                throw new Error(`Model "${this.getModel()}" was not found. Check the drift.ai.model setting.`, { cause: error });
             }
             if (error instanceof Anthropic.APIError) {
-                throw new Error(`Anthropic API error ${error.status}: ${error.message}`);
+                throw new Error(`Anthropic API error ${error.status}: ${error.message}`, { cause: error });
             }
             throw error;
         } finally {
@@ -222,7 +222,7 @@ export class VsCodeLmProvider implements SemanticProvider {
 
         // Prefer the most capable-looking model, fall back to the first
         const model = models.find(m => /opus|sonnet|claude/i.test(m.family) || /opus|sonnet|claude/i.test(m.name))
-            ?? models.find(m => /gpt-4|o[134]/i.test(m.family))
+            ?? models.find(m => /gpt-\d|o[134]/i.test(m.family))
             ?? models[0];
 
         const messages = [

@@ -68,7 +68,7 @@ export class PythonParser extends BaseParser {
                 const docstringQuote = this.getDocstringQuote(docLine);
 
                 if (docstringQuote) {
-                    let docEnd = docStart;
+                    let docEnd: number;
 
                     // Handle single-line docstring
                     if (docLine.endsWith(docstringQuote) && docLine.length > docstringQuote.length * 2) {

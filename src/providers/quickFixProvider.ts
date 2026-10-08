@@ -82,13 +82,12 @@ export class QuickFixProvider implements vscode.CodeActionProvider {
         // This is a simplified logic. In real world, we'd check the parser type.
         // For MVP, checking content or file extension.
 
-        let insertText = '';
+        let insertText: string;
         let insertPosition: vscode.Position;
 
         if (document.languageId === 'python') {
             // Python Docstring
             // Insert before the closing quotes
-            insertText = `    :param ${paramName}: description\n`;
             // Locate indentation of the closing quotes
             const closingMatch = lastLineText.match(/(\s*)("""|''')/);
             if (closingMatch) {
@@ -102,15 +101,11 @@ export class QuickFixProvider implements vscode.CodeActionProvider {
         } else {
             // JSDoc / JavaDoc / GoDoc / RustDoc
             if (document.languageId === 'go') {
-                insertText = `// ${paramName}: \n`;
-                insertPosition = toVsPosition(pair.docRange.end).translate(0, 1); // Go docs are usually strictly lines. append new line
                 // Go is special, docRange might encompass multiple // lines.
                 // We typically append to the last line.
                 // Actually Go doesn't have a standard param tag... mostly conventionally "param x description"
                 return null; // Go Quick Fix not supported yet
             } else if (document.languageId === 'rust') {
-                insertText = `/// * \`${paramName}\` - \n`;
-                insertPosition = toVsPosition(pair.docRange.end).translate(0, 1); // Append new line?
                 // Rust is /// ... 
                 // We need to insert a new line with ///
                 const indent = document.lineAt(pair.docRange.start.line).firstNonWhitespaceCharacterIndex;

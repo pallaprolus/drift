@@ -317,9 +317,8 @@ export abstract class BaseParser implements LanguageParser {
             // Detect section headers
             if (i + 1 < lines.length) {
                 const nextLine = lines[i + 1].trim();
-                // Check for underline (at least 3 dashes) matching roughly the header length? 
-                // NumPy usually strictly requires dashes.
-                if (nextLine.startsWith('---') && nextLine.length >= 3) {
+                // NumPy section titles are followed by at least three dashes.
+                if (trimmed && /^-{3,}$/.test(nextLine)) {
                     currentSection = trimmed.toLowerCase();
                     i++; // Skip the underline
                     continue;
@@ -338,12 +337,29 @@ export abstract class BaseParser implements LanguageParser {
                     const isOptional = typeInfo.toLowerCase().includes('optional');
                     const cleanType = typeInfo.replace(/,\s*optional/i, '').trim();
 
+                    const paramIndent = line.length - line.trimStart().length;
+                    const descriptionLines: string[] = [];
+                    while (i + 1 < lines.length) {
+                        const nextLine = lines[i + 1];
+                        const nextTrimmed = nextLine.trim();
+                        if (nextTrimmed && i + 2 < lines.length && /^-{3,}$/.test(lines[i + 2].trim())) {
+                            break;
+                        }
+                        if (nextTrimmed && nextLine.length - nextLine.trimStart().length <= paramIndent) {
+                            break;
+                        }
+                        if (nextTrimmed) {
+                            descriptionLines.push(nextTrimmed);
+                        }
+                        i++;
+                    }
+
                     // Avoid duplicates
                     if (!result.params.some(p => p.name === name)) {
                         result.params.push({
                             name,
                             type: cleanType,
-                            description: '', // TODO: Extract description from following lines
+                            description: descriptionLines.join(' ').trim(),
                             isOptional
                         });
                     }

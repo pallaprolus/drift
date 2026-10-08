@@ -1,4 +1,6 @@
-const Mocha = require('mocha');
+// mocha 12 is ESM: Node 20's require() returns the module namespace, newer Node returns the class
+const mochaModule = require('mocha');
+const Mocha = mochaModule.default || mochaModule;
 const path = require('path');
 const glob = require('glob');
 
