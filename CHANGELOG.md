@@ -2,7 +2,7 @@
 
 All notable changes to the Drift extension are documented here.
 
-## [Unreleased]
+## [0.7.5] - 2026-10-07
 
 ### Changed
 - AI semantic checks default to `claude-opus-5-5` (setting `drift.ai.model`). With the VS Code language model provider, any GPT model is now preferred over an unknown one when no Claude model is available, not only GPT-4.
